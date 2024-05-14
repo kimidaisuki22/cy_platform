@@ -10,12 +10,40 @@
 #include <winnt.h>
 
 #pragma comment(lib, "Dxva2.lib")
+std::string utf16_to_utf8(const std::wstring &utf16_string) {
+  if (utf16_string.empty()) {
+    return std::string();
+  }
+
+  // Calculate the size of the destination buffer
+  int utf8_size = WideCharToMultiByte(CP_UTF8, 0, utf16_string.data(), -1,
+                                      nullptr, 0, nullptr, nullptr);
+  if (utf8_size == 0) {
+    throw std::runtime_error("Failed to compute UTF-8 string length.");
+  }
+
+  // Create a buffer to store UTF-8 string
+  std::string utf8_string(utf8_size, 0);
+
+  // Convert from UTF-16 to UTF-8
+  int convert_result =
+      WideCharToMultiByte(CP_UTF8, 0, utf16_string.data(), -1, &utf8_string[0],
+                          utf8_size, nullptr, nullptr);
+  if (convert_result == 0) {
+    throw std::runtime_error("Failed to convert UTF-16 string to UTF-8.");
+  }
+
+  // Remove the null terminator
+  utf8_string.resize(utf8_size - 1);
+
+  return utf8_string;
+}
 class Physical_monitor {
 public:
   Physical_monitor(HANDLE handle, std::wstring native_name)
       : monitor_(handle), name_(native_name) {}
   void *get_handle() { return monitor_; }
-  std::string get_name() { return {}; }
+  std::string get_name() const { return utf16_to_utf8(name_); }
   struct Brightness {
     DWORD min_;
     DWORD current_;
@@ -72,8 +100,8 @@ void change_monitor_brightness(DWORD new_brightness) {
     if (!monitor.set_brightness(new_brightness)) {
       std::cerr << "Error setting brightness for monitor " << i << ".\n";
     }
-    std::cout << "Change monitor " << i << ": " << cu << " -> "
-              << new_brightness << " -> " << cu << "\n";
+    std::cout << "Change monitor " << i << " " << monitor.get_name() << ": "
+              << cu << " -> " << new_brightness << " -> " << cu << "\n";
     Sleep(3000);
     monitor.set_brightness(cu);
   }
