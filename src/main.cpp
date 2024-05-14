@@ -1,12 +1,41 @@
+#include <cassert>
 #include <highlevelmonitorconfigurationapi.h>
 #include <iostream>
 #include <main/main.h>
 #include <minwindef.h>
 #include <physicalmonitorenumerationapi.h>
+#include <string>
 #include <synchapi.h>
 #include <windows.h>
+#include <winnt.h>
 
 #pragma comment(lib, "Dxva2.lib")
+class Physical_monitor {
+public:
+  Physical_monitor(HANDLE handle, std::wstring native_name)
+      : monitor_(handle), name_(native_name) {}
+  void *get_handle() { return monitor_; }
+  std::string get_name() { return {}; }
+  struct Brightness {
+    DWORD min_;
+    DWORD current_;
+    DWORD max_;
+
+    bool ok_{};
+  };
+  Brightness get_current_brightness() {
+    Brightness brightness{};
+    auto ok = GetMonitorBrightness(monitor_, &brightness.min_,
+                                   &brightness.current_, &brightness.max_);
+    brightness.ok_ = ok;
+    return brightness;
+  }
+  bool set_brightness(DWORD brightness) {
+    return SetMonitorBrightness(monitor_, brightness);
+  }
+  HANDLE monitor_{};
+  std::wstring name_;
+};
 void change_monitor_brightness(DWORD new_brightness) {
   // Get the handle to the monitor
   HMONITOR h_monitor =
@@ -37,16 +66,16 @@ void change_monitor_brightness(DWORD new_brightness) {
 
   // Set the brightness for each monitor
   for (DWORD i = 0; i < monitor_count; i++) {
-    DWORD mi, cu, ma;
-    GetMonitorBrightness(physical_monitors[i].hPhysicalMonitor, &mi, &cu, &ma);
-    if (!SetMonitorBrightness(physical_monitors[i].hPhysicalMonitor,
-                              new_brightness)) {
+    Physical_monitor monitor{physical_monitors[i].hPhysicalMonitor,
+                             physical_monitors[i].szPhysicalMonitorDescription};
+    auto cu = monitor.get_current_brightness().current_;
+    if (!monitor.set_brightness(new_brightness)) {
       std::cerr << "Error setting brightness for monitor " << i << ".\n";
     }
     std::cout << "Change monitor " << i << ": " << cu << " -> "
               << new_brightness << " -> " << cu << "\n";
     Sleep(3000);
-    SetMonitorBrightness(physical_monitors[i].hPhysicalMonitor, cu);
+    monitor.set_brightness(cu);
   }
 
   // Clean up
