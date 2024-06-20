@@ -1,4 +1,5 @@
 #include "main/monitor_brightness.h"
+#include "main/turn_off_screen.h"
 #include <cstdint>
 #include <cstring>
 #include <minwindef.h>
@@ -11,13 +12,9 @@ void test_brightness() {
   change_monitor_brightness(brightness);
 }
 
+#include "main/network_speed.h"
 #include "main/serial_port.h"
 int main(int argc, char **argv) {
-  do {
-    try {
-      test_serial_port(std::stoi(argv[1]));
-    } catch (...) {
-    }
-  } while (argc > 2);
-  return 0;
+  turn_off_screen();
+  // network_speed_monitor_test();
 }
