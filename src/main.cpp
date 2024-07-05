@@ -16,6 +16,7 @@ void test_brightness() {
 
 #include "main/network_speed.h"
 #include "main/serial_port.h"
+#include <main/win32/get_front_window_position.h>
 #include <main/win32/get_mouse_position.h>
 int main(int argc, char **argv) {
   // turn_off_screen();
@@ -23,7 +24,8 @@ int main(int argc, char **argv) {
 
   while (true) {
     auto [x, y] = cy_platform::get_mouse_position();
-    std::cout << x << ", " << y << "     \r";
+    auto [w_x, w_y] = cy_platform::get_front_window_position();
+    std::cout << x << ", " << y << " - " << w_x << ", " << w_y << "     \r";
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
   }
 }
