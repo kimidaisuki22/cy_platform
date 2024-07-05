@@ -14,7 +14,9 @@ project(main VERSION 0.0.1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp
+src/win32/utf8_to_wstring.cpp
+)
 
 find_package(fmt CONFIG REQUIRED)
 target_link_libraries(main PRIVATE fmt::fmt)
