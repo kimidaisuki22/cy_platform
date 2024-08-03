@@ -11,24 +11,32 @@ if(BUILD_TESTING)
   list(APPEND VCPKG_MANIFEST_FEATURES "test")
 endif()
 
+
+
 project(main VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(main src/main.cpp
+add_library(cy_platform)
+
+target_sources(cy_platform PRIVATE
 src/win32/utf8_to_wstring.cpp
+src/win32/media_control.cpp
+src/win32/send_keyboard.cpp
 )
+add_executable(main src/main.cpp)
 
 find_package(fmt CONFIG REQUIRED)
 target_link_libraries(main PRIVATE fmt::fmt)
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(main PRIVATE spdlog::spdlog)
+target_link_libraries(main PRIVATE spdlog::spdlog cy_platform)
 
-target_include_directories(main PUBLIC
+target_include_directories(cy_platform PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
 )
+
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)

@@ -9,6 +9,6 @@ add_executable(
 target_link_libraries(
   hello_test
   PRIVATE
-  GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main
+  GTest::gtest GTest::gtest_main cy_platform
 )
-add_test(test_A hello_test) 
+add_test(test_A hello_test)
