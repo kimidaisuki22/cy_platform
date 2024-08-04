@@ -5,10 +5,12 @@
 #include <cstring>
 #include <format>
 #include <minwindef.h>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <thread>
+#include <vector>
 #include <winbase.h>
 void test_brightness() {
   DWORD brightness = 50; // Set desired brightness (0-100)
@@ -20,6 +22,15 @@ void test_brightness() {
 #include <main/win32/get_front_window_position.h>
 #include <main/win32/get_front_window_title.h>
 #include <main/win32/get_mouse_position.h>
+class Term {
+public:
+  void hide_cursor() { os << "\033[?25l"; }
+  void clean_screen() { os << "\033[2J"; }
+  void move_cursor(int x, int y) { os << std::format("\033[{};{}H", x, y); }
+
+private:
+  std::ostream &os = std::cout;
+};
 int main(int argc, char **argv) {
   // turn_off_screen();
   // network_speed_monitor_test();
@@ -37,15 +48,24 @@ int main(int argc, char **argv) {
   printf("Title Bar Height: %d pixels\n", titleBarHeight);
   printf("Border Width: %d pixels\n", borderWidth);
   printf("Border Height: %d pixels\n", borderHeight);
-
+  auto line_up = [](int n) { std::cout << std::format("\033[{}A", n); };
+  Term term;
+  term.clean_screen();
+  term.hide_cursor();
+  term.move_cursor(0, 0);
   while (true) {
     auto [x, y] = cy_platform::get_mouse_position();
     auto [w_x, w_y] = cy_platform::get_front_window_position();
-    auto title_text =
-        std::format("{}, {} - {}, {} [{} {}] {}", x, y, w_x, w_y, x - w_x,
-                    y - w_y - titleBarHeight,
-                    cy_platform::get_front_window_title().value_or("[FAILED]"));
-    std::cout << std::format("{:120}\r", title_text);
+    std::vector<std::string> lines;
+    lines.push_back(std::format("{}, {} - {}, {}", x, y, w_x, w_y));
+    lines.push_back(std::format(
+        "[{} {}] {}", x - w_x, y - w_y - titleBarHeight,
+        cy_platform::get_front_window_title().value_or("[FAILED]")));
+
+    for (auto line : lines) {
+      std::cout << std::format("{:120}\n", line);
+    }
+    line_up(lines.size());
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
   }
 }
