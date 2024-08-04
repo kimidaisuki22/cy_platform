@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <minwindef.h>
 #include <stdexcept>
 #include <string>
@@ -17,6 +18,7 @@ void test_brightness() {
 #include "main/network_speed.h"
 #include "main/serial_port.h"
 #include <main/win32/get_front_window_position.h>
+#include <main/win32/get_front_window_title.h>
 #include <main/win32/get_mouse_position.h>
 int main(int argc, char **argv) {
   // turn_off_screen();
@@ -25,7 +27,10 @@ int main(int argc, char **argv) {
   while (true) {
     auto [x, y] = cy_platform::get_mouse_position();
     auto [w_x, w_y] = cy_platform::get_front_window_position();
-    std::cout << x << ", " << y << " - " << w_x << ", " << w_y << "     \r";
+    auto title_text =
+        std::format("{}, {} - {}, {} {}", x, y, w_x, w_y,
+                    cy_platform::get_front_window_title().value_or("[FAILED]"));
+    std::cout << std::format("{:80}\r", title_text);
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
   }
 }
