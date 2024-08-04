@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     for (auto line : lines) {
       std::cout << std::format("{:120}\n", line);
     }
-    line_up(lines.size());
+    term.move_cursor(0, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
   }
 }
