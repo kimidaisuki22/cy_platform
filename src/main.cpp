@@ -23,14 +23,15 @@ void test_brightness() {
 int main(int argc, char **argv) {
   // turn_off_screen();
   // network_speed_monitor_test();
+  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
   while (true) {
     auto [x, y] = cy_platform::get_mouse_position();
     auto [w_x, w_y] = cy_platform::get_front_window_position();
-    auto title_text =
-        std::format("{}, {} - {}, {} {}", x, y, w_x, w_y,
-                    cy_platform::get_front_window_title().value_or("[FAILED]"));
-    std::cout << std::format("{:80}\r", title_text);
+    auto title_text = std::format(
+        "{}, {} - {}, {} [{} {}] {}", x, y, w_x, w_y, x - w_x, y - w_y,
+        cy_platform::get_front_window_title().value_or("[FAILED]"));
+    std::cout << std::format("{:120}\r", title_text);
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
   }
 }
