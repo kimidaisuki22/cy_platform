@@ -28,11 +28,16 @@ int main(int argc, char **argv) {
   //   move(10, 10);
   //   std::this_thread::sleep_for(std::chrono::milliseconds{10});
   // }
-  device.write("help()\r\n");
-  std::cout << device.read(8) << "\n";
   std::cout << "Auto clicker\n";
+  device.write("help()\r\n");
+  std::cout << device.read(32) << "\n";
+  move(10, 10);
   for (;;) {
+    std::cout << "clicking\n";
     click(0);
+    int ms_t = 50 + (rand() * 1.f / RAND_MAX) * 30;
+    std::this_thread::sleep_for(std::chrono::milliseconds{ms_t});
+    move(0, 0);
     int t = 80 + (rand() * 1.f / RAND_MAX) * 30;
     std::this_thread::sleep_for(std::chrono::seconds{t});
   }
