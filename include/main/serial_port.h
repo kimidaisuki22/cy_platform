@@ -1,9 +1,12 @@
 #pragma once
 #include <iostream>
 
-#include <fileapi.h>
 #include <Windows.h>
+#include <fileapi.h>
+#include <minwindef.h>
 #include <string>
+#include <vector>
+
 void PrintCommState(DCB dcb) {
   printf("BaudRate = %d, ByteSize = %d, Parity = %d, StopBits = %d ev=%d "
          "on_ch=%d\n",
@@ -166,3 +169,66 @@ void test_serial_port(int n) {
     // std::cout << "AAA\n";
   } while (ok);
 }
+
+class Serial_device {
+public:
+  HANDLE file_handle_{};
+
+  Serial_device(int n) {
+    std::string com_path = "\\\\.\\COM" + std::to_string(n);
+
+    file_handle_ = CreateFileA(com_path.c_str(), GENERIC_READ | GENERIC_WRITE,
+                               0, NULL, OPEN_EXISTING, 0, NULL);
+
+    if (file_handle_ == INVALID_HANDLE_VALUE) {
+      std::cerr << "CreateFile failed with error " << GetLastError() << ".\n";
+      throw std::runtime_error("failed to connect");
+    }
+    std::cout << "Connected to " << com_path << "\n";
+    SetCommMask(file_handle_, EV_BREAK);
+
+    DCB dcb = {0};
+    dcb.DCBlength = sizeof(DCB);
+    if (!GetCommState(file_handle_, &dcb)) {
+      std::cerr << "GetCommState failed with error " << GetLastError() << ".\n";
+      throw std::runtime_error("failed to get comm state");
+    }
+
+    // Set DCB to configure the serial port
+    dcb.BaudRate = CBR_9600;
+    dcb.ByteSize = 8;
+    dcb.Parity = NOPARITY;
+    dcb.StopBits = ONESTOPBIT;
+    dcb.fBinary = TRUE;
+    dcb.fParity = TRUE;
+    dcb.fInX = FALSE;
+    dcb.fOutX = FALSE;
+    if (!SetCommState(file_handle_, &dcb)) {
+      std::cerr << "SetCommState failed with error " << GetLastError() << ".\n";
+      throw std::runtime_error("failed to set comm state");
+    }
+
+    ClearCommError(file_handle_, nullptr, nullptr);
+  }
+
+  std::string read(int n) {
+    std::vector<char> buffer;
+    buffer.resize(n);
+    DWORD bytesRead = 0;
+    if (!ReadFile(file_handle_, buffer.data(), n, &bytesRead, nullptr)) {
+      std::cerr << "Read failed with error " << GetLastError() << ".\n";
+      return "";
+    }
+    return std::string(buffer.data(), bytesRead);
+  }
+
+  bool write(const std::string &data) {
+    DWORD bytesWritten = 0;
+    if (!WriteFile(file_handle_, data.data(), static_cast<DWORD>(data.size()),
+                   &bytesWritten, nullptr)) {
+      std::cerr << "Write failed with error " << GetLastError() << ".\n";
+      return false;
+    }
+    return true;
+  }
+};

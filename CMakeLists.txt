@@ -32,6 +32,9 @@ target_link_libraries(main PRIVATE fmt::fmt)
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(main PRIVATE spdlog::spdlog cy_platform)
 
+add_executable(serial_main src/serial_main.cpp)
+target_link_libraries(serial_main PRIVATE spdlog::spdlog cy_platform)
+
 target_include_directories(cy_platform PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
