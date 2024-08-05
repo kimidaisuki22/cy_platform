@@ -57,10 +57,14 @@ int main(int argc, char **argv) {
     auto [x, y] = cy_platform::get_mouse_position();
     auto [w_x, w_y] = cy_platform::get_front_window_position();
     auto [c_x, c_y] = cy_platform::get_mouse_position_in_front_window();
+    auto [size_x, size_y] = cy_platform::get_front_window_size();
     std::vector<std::string> lines;
     lines.push_back(std::format("{}, {} - {}, {}", x, y, w_x, w_y));
     lines.push_back(std::format("[{} {}]", x - w_x, y - w_y - titleBarHeight));
     lines.push_back(std::format("client: [{} {}]", c_x, c_y));
+    lines.push_back(std::format("client %: [{:.2} {:.2}]", c_x * 1.f / size_x,
+                                c_y * 1.f / size_y));
+    lines.push_back(std::format("size: [{} {}]", size_x, size_y));
     lines.push_back(std::format(
         "Title: '{}'",
         cy_platform::get_front_window_title().value_or("[FAILED]")));
