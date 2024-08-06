@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <format>
+#include <main/win32/get_front_window_prop.h>
 #include <minwindef.h>
 #include <ostream>
 #include <stdexcept>
@@ -57,6 +58,10 @@ int main(int argc, char **argv) {
     auto [x, y] = cy_platform::get_mouse_position();
     auto [w_x, w_y] = cy_platform::get_front_window_position();
     auto [c_x, c_y] = cy_platform::get_mouse_position_in_front_window();
+    auto hwnd = GetForegroundWindow();
+    auto pid = cy_platform::get_pid_by_hwnd(hwnd);
+    auto path = cy_platform::get_exe_path_by_pid(pid.value_or(0));
+
     auto [size_x, size_y] = cy_platform::get_front_window_size();
     std::vector<std::string> lines;
     lines.push_back(std::format("{}, {} - {}, {}", x, y, w_x, w_y));
@@ -70,7 +75,16 @@ int main(int argc, char **argv) {
         cy_platform::get_front_window_title().value_or("[FAILED]")));
     lines.push_back(
         std::format("bar height: {}", cy_platform::get_bar_height()));
-
+    lines.push_back(std::format("pid: {}", pid.value_or(-1)));
+    lines.push_back(std::format("path: {}", path.value_or("Failed")));
+    if (path) {
+      for (auto &ch : *path) {
+        if (ch == '\\') {
+          ch = '/';
+        }
+      }
+      lines.push_back(std::format("path -: {}", *path));
+    }
     for (auto line : lines) {
       std::cout << std::format("\033[0K{}\n", line);
     }
