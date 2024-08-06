@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   for (;;) {
     std::cout << "clicking\n";
     click(0);
-    int ms_t = 50 + (rand() * 1.f / RAND_MAX) * 30;
+    int ms_t = 20 + (rand() * 1.f / RAND_MAX) * 30;
     std::this_thread::sleep_for(std::chrono::milliseconds{ms_t});
     move(0, 0);
     int t = 80 + (rand() * 1.f / RAND_MAX) * 30;
