@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
         std::format("bar height: {}", cy_platform::get_bar_height()));
 
     for (auto line : lines) {
-      std::cout << std::format("{}\n\033[0K", line);
+      std::cout << std::format("\033[0K{}\n", line);
     }
     term.move_cursor(0, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
