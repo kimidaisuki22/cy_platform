@@ -34,26 +34,7 @@ public:
 private:
   std::ostream &os = std::cout;
 };
-void boxes() {
-  class Box {
-  public:
-    Box() : pos_{} {}
-    Box(float left, float right, float top, float down)
-        : pos_{left, right, top, down} {}
-    std::array<float, 4> pos_;
-    float &left() { return pos_[0]; }
-    float &right() { return pos_[1]; }
-    float &top() { return pos_[2]; }
-    float &down() { return pos_[3]; }
-  };
-  std::unordered_map<std::string, Box> boxes;
-  boxes["again"] = {0.55, 0.7, 0.80, 0.84};
-  boxes["finish_battle"] = {0.29, 0.49, 0.80, 0.84};
-  boxes["EP"] = {0.84, 0.9, 0.04, 0.07};
-  boxes["top_menu_card"] = {0.82, 0.84, 0.018, 0.056};
-  boxes["active_point_0"] = {0.18, 0.26, 0.70, 0.74};
-  boxes["active_point_bonus"] = {0.31, 0.35, 0.26, 0.30};
-}
+
 int main(int argc, char **argv) {
   // turn_off_screen();
   // network_speed_monitor_test();
